@@ -163,7 +163,7 @@
 
           // 値を設定（ここが重要！）
           input.value = icon.dataset.value;
-
+          
           // フォーカス解除して青い枠を防ぐ
           icon.blur();
 
@@ -184,17 +184,16 @@
       // バリデーション：未入力の質問があるかチェック
       const questions = document.querySelectorAll('.rating-group');
       questions.forEach(group => {
-        const input = group.querySelector('input[type="hidden"]');
-        const questionName = input.name;
+        const questionName = group.dataset.question;
+        const input = group.querySelector(`input[name="${questionName}"]`);
+        const value = input?.value?.trim();
 
-        if (!input.value) {
+        if (!value) {
           valid = false;
-
-          // 視覚的に未回答箇所をハイライト
           group.classList.add('ring-4', 'ring-red-400');
         } else {
           group.classList.remove('ring-4', 'ring-red-400');
-          data[questionName] = input.value;
+          data[questionName] = value;
         }
       });
 
@@ -203,7 +202,7 @@
       }
 
       // Google Apps Script に送信
-      fetch('https://script.google.com/macros/s/AKfycbwFGHNuo9gEdYeJX7a2omUmT5Y0a-aYy9y1Td2lI3pjVojaHaKtnRa7Skaa2xzOJ0cw/exec', {
+      fetch('https://script.google.com/macros/s/AKfycbzpppK-MRlQYw2-SLiX0EP_45m8PoNMR-2lFsSvtIkfHlbEDgjS-GtL9lgkE73YlQEXow/exec', {
         method: 'POST',
         mode: 'no-cors',
         headers: {
@@ -211,7 +210,6 @@
         },
         body: JSON.stringify(data),
       });
-
       // サンクスメッセージ表示
       document.getElementById('result').classList.remove('hidden');
 
