@@ -25,7 +25,7 @@
       background-position: center;
     }
     .bg-question4 {
-      background-image: url('');
+      background-image: url('https://www.asocity-kanko.jp/files/uploads/2021/12/89b64a45856f5a694211efab9ccc4e1d.jpg');
       background-size: cover;
       background-position: center;
     }
@@ -34,12 +34,43 @@
       background-size: cover;
       background-position: center;
     }
+
+    .rating-icon {
+      width: 2rem;
+      height: 2rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9999px; /* fully rounded */
+      position: relative;
+    }
+    .rating-icon::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%); /* Adjust vertical position */
+      width: 2rem;
+      height: 2rem;
+      background-color: #ffffff; /* yellow-400 */
+      border-radius: 9999px;
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .rating-icon.selected::before {
+      opacity: 1;
+    }
+    .rating-icon span {
+      position: relative;
+      z-index: 10;
+    }
   </style>
 </head>
 <body class="bg-gray-100 text-gray-800 p-4 sm:p-8">
 
   <div class="max-w-3xl mx-auto bg-[#00afda1b] p-6 sm:p-10 rounded-xl shadow-md">
-    <h1 class="text-2xl sm:text-3xl font-bold mb-6 text-center">ア</h1>
+    <h1 class="text-2xl sm:text-3xl font-bold mb-6 text-center">アンケート</h1>
     <form id="surveyForm" class="space-y-6">
 
       <!-- 質問カード（背景付き） -->
@@ -80,7 +111,7 @@
       </div>
 
       <div class="p-6 rounded-xl shadow bg-question4 bg-opacity-10 backdrop-blur-sm border border-gray-300 rating-group" data-question="q4">
-        <p class="mb-4 font-semibold text-lg bg-white bg-opacity-70 p-2 rounded text-center"></p>
+        <p class="mb-4 font-semibold text-lg bg-white bg-opacity-70 p-2 rounded text-center">阿蘇山</p>
         <div class="flex justify-between sm:justify-around">
           <label class="rating-icon cursor-pointer text-2xl transition" data-value="1">😡</label>
           <label class="rating-icon cursor-pointer text-2xl transition" data-value="2">😕</label>
@@ -125,13 +156,16 @@
       icons.forEach(icon => {
         icon.addEventListener('click', () => {
           // 全てリセット
-          icons.forEach(i => i.classList.remove('text-yellow-500', 'scale-125'));
+          icons.forEach(i => i.classList.remove('text-yellow-500', 'scale-125', 'ring-1', 'ring-yellow-400', 'rounded-full', 'ring-offset-0', 'selected'));
 
           // 選ばれたアイコンにスタイル追加
-          icon.classList.add('text-yellow-500', 'scale-125');
+          icon.classList.add('text-yellow-500', 'scale-125', 'ring-1', 'ring-yellow-400', 'rounded-full', 'ring-offset-0', 'selected');
 
           // 値を設定（ここが重要！）
           input.value = icon.dataset.value;
+
+          // フォーカス解除して青い枠を防ぐ
+          icon.blur();
 
           // 赤いハイライトがあれば削除（未回答エラーの解除）
           group.classList.remove('ring-4', 'ring-red-400');
@@ -141,62 +175,62 @@
 
     // フォーム送信イベント処理（Googleフォーム連携用に変更可能）
     document.getElementById('surveyForm').addEventListener('submit', function(e) {
-  e.preventDefault();
+      e.preventDefault();
 
-    const formData = new FormData(this);
-    const data = {};
-    let valid = true; // 未回答チェック用
+      const formData = new FormData(this);
+      const data = {};
+      let valid = true; // 未回答チェック用
 
-    // バリデーション：未入力の質問があるかチェック
-    const questions = document.querySelectorAll('.rating-group');
-    questions.forEach(group => {
-      const input = group.querySelector('input[type="hidden"]');
-      const questionName = input.name;
+      // バリデーション：未入力の質問があるかチェック
+      const questions = document.querySelectorAll('.rating-group');
+      questions.forEach(group => {
+        const input = group.querySelector('input[type="hidden"]');
+        const questionName = input.name;
 
-      if (!input.value) {
-        valid = false;
+        if (!input.value) {
+          valid = false;
 
-        // 視覚的に未回答箇所をハイライト
-        group.classList.add('ring-4', 'ring-red-400');
-      } else {
-        group.classList.remove('ring-4', 'ring-red-400');
-        data[questionName] = input.value;
-      }
-    });
-
-    if (!valid) {
-      return;
-    }
-
-    // Google Apps Script に送信
-    fetch('https://script.google.com/macros/s/AKfycbwFGHNuo9gEdYeJX7a2omUmT5Y0a-aYy9y1Td2lI3pjVojaHaKtnRa7Skaa2xzOJ0cw/exec', {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-
-    // サンクスメッセージ表示
-    document.getElementById('result').classList.remove('hidden');
-
-    // フォームを初期化
-    this.reset();
-
-    // hidden入力とアイコンのスタイルをリセット
-    questions.forEach(group => {
-      const input = group.querySelector('input[type="hidden"]');
-      input.value = ""; // hiddenフィールドを明示的にクリア
-
-      const icons = group.querySelectorAll('.rating-icon');
-      icons.forEach(icon => {
-        icon.classList.remove('text-yellow-500', 'scale-125');
+          // 視覚的に未回答箇所をハイライト
+          group.classList.add('ring-4', 'ring-red-400');
+        } else {
+          group.classList.remove('ring-4', 'ring-red-400');
+          data[questionName] = input.value;
+        }
       });
 
-      group.classList.remove('ring-4', 'ring-red-400');
+      if (!valid) {
+        return;
+      }
+
+      // Google Apps Script に送信
+      fetch('https://script.google.com/macros/s/AKfycbwFGHNuo9gEdYeJX7a2omUmT5Y0a-aYy9y1Td2lI3pjVojaHaKtnRa7Skaa2xzOJ0cw/exec', {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      // サンクスメッセージ表示
+      document.getElementById('result').classList.remove('hidden');
+
+      // フォームを初期化
+      this.reset();
+
+      // hidden入力とアイコンのスタイルをリセット
+      questions.forEach(group => {
+        const input = group.querySelector('input[type="hidden"]');
+        input.value = ""; // hiddenフィールドを明示的にクリア
+
+        const icons = group.querySelectorAll('.rating-icon');
+        icons.forEach(icon => {
+          icon.classList.remove('text-yellow-500', 'scale-125', 'ring-1', 'ring-yellow-400', 'rounded-full', 'ring-offset-1', 'selected');
+        });
+
+        group.classList.remove('ring-4', 'ring-red-400');
+      });
     });
-  });
 
   </script>
 </body>
